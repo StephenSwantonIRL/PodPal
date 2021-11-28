@@ -1,3 +1,12 @@
+#include <SR04.h>
+
+#define TRIG_PIN 3
+#define ECHO_PIN 2
+SR04 sr04 = SR04(ECHO_PIN, TRIG_PIN);
+long nearestObject;
+unsigned long delaytime1 = 500;
+unsigned long delaytime2 = 50;
+
 void setup() {
   Serial.begin(9600);
 }
@@ -28,11 +37,7 @@ void loop() {
     //{
     //  Serial.println(array[k]);
     //}
-    Serial.println(isBooked);
-    Serial.println(isSignedIn);
-    Serial.println(bookingEnd);
-    
-    Serial.print("You sent me: ");
-    Serial.println(data);
+    nearestObject = sr04.Distance();
+    Serial.print(nearestObject);
   }
 }
