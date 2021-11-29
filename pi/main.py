@@ -3,8 +3,10 @@ import time
 from pyzbar import pyzbar
 import cv2
 from picamera import PiCamera
+from sense_hat import SenseHat
 
-bookings = [43770929851162]
+sense = SenseHat()
+bookings = [b'43770929851162']
 
 
 def decode(image):
@@ -33,9 +35,11 @@ if __name__ == '__main__':
             print(img)
             cv2.waitKey(0)
             # loop through the detected barcodes to check if associated with any bookings
-            #for i in img:
-               # if  :
-                #match against current booking for pod
+            for i in img:
+                if i in bookings:
+                    sense.clear((0,128,0))
+                    time.sleep(3)
+                    sense.clear()
 
         ser.write(b"1#0#35#\n")
         line = ser.readline().decode('utf-8').rstrip()
