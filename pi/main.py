@@ -1,13 +1,12 @@
 import serial
 import time
 from pyzbar import pyzbar
-import cv2
-from picamera import PiCamera
 from sense_hat import SenseHat
+from imutils.video import VideoStream
 
 sense = SenseHat()
 bookings = [b'43770929851162']
-
+isSignedIn = 0
 
 def decode(image):
     decoded_objects = pyzbar.decode(image)
@@ -20,26 +19,22 @@ def decode(image):
 if __name__ == '__main__':
     ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
     ser.reset_input_buffer()
-    camera = PiCamera()
+    vs = VideoStream(usePiCamera=True).start()
     time.sleep(2)
 
     while True:
-
-        # barcode = camera.capture("./img2.jpg")
-        barcodes = ["./barcode1.png"]
-        for barcode_file in barcodes:
-            # load the image to opencv
-            img = cv2.imread(barcode_file)
-            # decode detected barcodes
-            img = decode(img)
-            print(img)
-            cv2.waitKey(0)
-            # loop through the detected barcodes to check if associated with any bookings
-            for i in img:
-                if i in bookings:
-                    sense.clear((0,128,0))
-                    time.sleep(3)
-                    sense.clear()
+        frame = vs.read()
+        barcodes = decode(frame)
+        for i in barcodes:
+            if i in bookings:
+                sense.clear((0,128,0))
+                time.sleep(3)
+                sense.clear()
+                isSignedIn = 1
+            else:
+                sense.clear((255,0,0))
+                time.sleep(3)
+                sense.clear()
 
         ser.write(b"1#0#35#\n")
         line = ser.readline().decode('utf-8').rstrip()
