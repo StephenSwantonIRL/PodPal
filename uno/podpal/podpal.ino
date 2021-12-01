@@ -1,14 +1,28 @@
+#include <LiquidCrystal.h>
+#include <TimeLib.h>
 #include <SR04.h>
 
 #define TRIG_PIN 3
 #define ECHO_PIN 2
 SR04 sr04 = SR04(ECHO_PIN, TRIG_PIN);
+LiquidCrystal lcd(4, 5, 6, 7, 8, 9);
 long nearestObject;
 unsigned long delaytime1 = 500;
 unsigned long delaytime2 = 50;
+unsigned long bookingEndTime;
+unsigned long startTime;
+unsigned long timeRemaining;
+boolean isBooked;
+boolean isSignedIn; 
+unsigned int bookingEnd;
+
+
 
 void setup() {
   Serial.begin(9600);
+  lcd.begin(16, 2);
+  lcd.print("Minutes Remaining:");
+
 }
 void loop() {
   if (Serial.available() > 0) {
@@ -29,15 +43,22 @@ void loop() {
         r = (i+1);
       }
     }
-    boolean isBooked = array[0].toInt();
-    boolean isSignedIn = array[1].toInt(); 
-    int bookingEnd = array[2].toInt();
+    isBooked = array[0].toInt();
+    isSignedIn = array[1].toInt(); 
+    bookingEnd = array[2].toInt();
+    unsigned long endBooking = (unsigned long) bookingEnd;
+    startTime = millis();
+    if(bookingEnd>0){
+    bookingEndTime = startTime + endBooking * 1000 *60;
     
-    //for(int k=0 ;k<=t ;k++)
-    //{
-    //  Serial.println(array[k]);
-    //}
-    nearestObject = sr04.Distance();
-    Serial.print(nearestObject);
+    }
   }
+  nearestObject = sr04.Distance();
+  Serial.print(nearestObject);
+  lcd.setCursor(0, 1);
+  if(bookingEndTime>0){
+  timeRemaining = (bookingEndTime - millis());
+  lcd.print(timeRemaining/60000);
+  }
+  
 }
