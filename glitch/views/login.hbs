@@ -1,0 +1,20 @@
+{{> welcomemenu id="login"}}
+
+<div class="ui two column middle aligned grid basic segment">
+  <div class="column">
+    <form class="ui stacked segment form" action="/authenticate" method="POST">
+      <h3 class="ui header">Log-in</h3>
+      <p id="notification">{{notify}}</p>
+      <div class="field">
+        <label>Email</label> <input name="email" required>
+      </div>
+      <div class="field">
+        <label>Password</label> <input type="password" name="password" required>
+      </div>
+      <button class="ui submit button">Login</button> or <a href="/signup">sign up</a>.
+    </form>
+  </div>
+  <div class="column no-padding">
+    <!--<img class="floating-image ui fluid image" src="images/*.png">  -->
+  </div>
+</div>
