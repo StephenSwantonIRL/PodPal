@@ -1,5 +1,26 @@
 {{> menu id="dashboard"}}
 
-<section class="ui segment">
-  {{> mainpanel}}
-</section>
+
+  <section class="ui segment">
+    {{# if devicesempty}}
+    <h3> You don't have any devices yet. Create one below</h3>
+    {{/if}}
+    {{#each devices}}
+    <section class="ui segment">
+      <h2 class="ui header">
+        {{name}}
+      </h2>
+
+      <div id="deviceactions">
+        <a href="/device/{{id}}" class="ui icon button">
+          <i class="icon folder open"></i>
+        </a>
+        <a href="/dashboard/deletedevice/{{id}}" class="ui icon button">
+          <i class="icon trash"></i>
+        </a>
+      </div>
+    </section>
+    {{/each}}
+  </section>
+{{>adddevice }}
+{{>addemployees}}

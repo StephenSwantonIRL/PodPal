@@ -46,9 +46,6 @@ const accounts = {
     })
       .catch(function (error) {
       });
-
-    console.log(result)
-
     const admin = await sql` insert into admin (fName, lName, email, password, pushAlertId ) values (${user.firstname}, ${user.lastname},${user.email},${userpw},${result})`
     console.log(admin)
 
@@ -62,6 +59,7 @@ const accounts = {
     const sql = postgres(process.env.postgreSQLdb);
     const checkIfRegistered = await sql` select * from admin where email =${userToAuthenticate.email} AND password=${userpw}`
     if(checkIfRegistered['count']==1){
+      response.cookie("podpal", userToAuthenticate.email);
       response.redirect("/dashboard");
     }
     else  {
@@ -72,7 +70,16 @@ const accounts = {
         response.render("login", viewData);
       }
 
-    }
+    },
+
+  async getCurrentUser(email) {
+    const userEmail = email.toString();
+    console.log(email)
+    const sql = postgres(process.env.postgreSQLdb);
+    const currentUser = await sql` select * from admin where email ='${userEmail}' `
+    console.log("Count:" + currentUser['count'])
+    return currentUser[0];
+  }
   }
 
 

@@ -19,4 +19,7 @@ router.get("/", dashboard.index);
 router.get("/dashboard", dashboard.index);
 router.get("/about", about.index);
 
+router.post("/dashboard/addDevice", dashboard.addDevice)
+router.post("/dashboard/addemployee", dashboard.addEmployee)
+
 module.exports = router;
