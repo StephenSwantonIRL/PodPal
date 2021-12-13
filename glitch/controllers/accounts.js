@@ -6,6 +6,7 @@ const uuid = require("uuid");
 const postgres = require('postgres')
 const axios = require('axios');
 const CryptoJS = require("crypto-js")
+const sql = require('../db.js')
 
 const accounts = {
   index(request, response) {
@@ -37,7 +38,6 @@ const accounts = {
   async register(request, response) {
     const user = request.body;
     const pushAlertUUID = "name="+uuid.v1().replace(/-/g, "");
-    const sql = postgres(process.env.postgreSQLdb);
     const userpw = CryptoJS.MD5(user.password)
     const pushAlert = `https://api.pushalert.co/rest/v1/segment/create`
     const pushAlertKey = "api_key="+process.env.pushalertAPI
@@ -56,7 +56,7 @@ const accounts = {
   async authenticate(request, response) {
     const userToAuthenticate = request.body;
     const userpw = CryptoJS.MD5(userToAuthenticate.password).toString()
-    const sql = postgres(process.env.postgreSQLdb);
+
     const checkIfRegistered = await sql` select * from admin where email =${userToAuthenticate.email} AND password=${userpw}`
     if(checkIfRegistered['count']==1){
       response.cookie("podpal", userToAuthenticate.email);
@@ -75,7 +75,6 @@ const accounts = {
   async getCurrentUser(email) {
     const userEmail = email.toString();
     console.log(email)
-    const sql = postgres(process.env.postgreSQLdb);
     const currentUser = await sql` select * from admin where email ='${userEmail}' `
     console.log("Count:" + currentUser['count'])
     return currentUser[0];

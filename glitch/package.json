@@ -20,6 +20,7 @@
     "lowdb": "^1.0.0",
     "postgres": "^1.0.2",
     "postgresql": "0.0.1",
+    "prexit": "^1.0.0",
     "uuid": "^8.3.2",
     "winston": "^3.3.3"
   },

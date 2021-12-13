@@ -1,0 +1,24 @@
+<table class="ui fixed table">
+  <thead>
+  <tr>
+    <th>Email</th>
+    <th>Barcode</th>
+    <th></th>
+  </tr>
+  </thead>
+  <tbody>
+  {{#each employees}}
+  <tr>
+    <td>
+      {{email}}
+    </td>
+    <td>
+      {{barcodeid}}
+    </td>
+    <td>
+      <a href="/station/{{../sid}}/deletereading/{{id}}" class="ui tiny button">Delete Reading</a>
+    </td>
+  </tr>
+  {{/each}}
+  </tbody>
+</table>
