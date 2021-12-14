@@ -6,6 +6,23 @@ const postgres = require('postgres')
 const axios = require('axios');
 const uuid = require("uuid");
 const sql = require('../db.js')
+const nodemailer = require("nodemailer");
+
+
+async function sendInvite(email) {
+
+  console.log(`smtps://${process.env.systememail}:${process.env.systememailpw}@${process.env.systememailhost}/?pool=true`)
+  let transporter = nodemailer.createTransport(`smtps://${process.env.systememail}:${process.env.systememailpw}@${process.env.systememailhost}/?pool=true`)
+  let info = await transporter.sendMail({
+    from: 'PodPal <alerts@podpal.work>',
+    to: email,
+    subject: "Hello You've been invited to join a Podpal Workspace", // Subject line
+    text: "Hello world?", // plain text body
+    html: "<b>Hello world?</b>", // html body
+  });
+
+  console.log("Message sent: %s", info.messageId);
+}
 
 const dashboard = {
   async index(request, response) {
@@ -62,10 +79,13 @@ const dashboard = {
     for(let i=0; i<invitedEmailsArray.length; i++){
       let barcode = uuid.v1().replace(/-/g, "");
       let invitation = await sql` INSERT INTO employee (email, accountAdmin, barcodeId) VALUES ( ${invitedEmailsArray[i]}, ${currentUser[0].id}, ${barcode})`
+      await sendInvite(invitedEmailsArray[i]).catch();
     }
 
     response.redirect("/dashboard");
-  }
+  },
+
+
 
 }
 module.exports = dashboard;

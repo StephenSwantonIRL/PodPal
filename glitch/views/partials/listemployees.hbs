@@ -13,12 +13,21 @@
       {{email}}
     </td>
     <td>
+      <svg class="barcode"
+           jsbarcode-width="1"
+           jsbarcode-height="50"
+           jsbarcode-value="{{barcodeid}}"
+           jsbarcode-textmargin="0"
+           jsbarcode-fontoptions="bold">
+      </svg><br>
       {{barcodeid}}
     </td>
     <td>
-      <a href="/station/{{../sid}}/deletereading/{{id}}" class="ui tiny button">Delete Reading</a>
+      <a href="/station/{{../sid}}/deletereading/{{id}}" class="ui tiny button">Revoke</a>
     </td>
   </tr>
   {{/each}}
   </tbody>
 </table>
+
+<script>JsBarcode(".barcode").init();</script>
