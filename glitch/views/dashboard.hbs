@@ -25,3 +25,11 @@
 {{>adddevice }}
 {{>listemployees}}
 {{>addemployees}}
+<script>
+  (pushalertbyiw = window.pushalertbyiw || []).push(['addToSegment', {{notificationChannel}}, callbackFunction]);
+
+  function callbackFunction(result){
+    console.log(result.success) // True or False
+    //Your Code
+  }
+</script>

@@ -27,6 +27,9 @@ async function sendInvite(email) {
 const dashboard = {
   async index(request, response) {
     const email = request.cookies.podpal;
+    if(email==null){
+      response.redirect("/");
+    }
     const userEmail = email.toString();
     const currentUser = await sql` select * from admin where email =${userEmail}`;
     const devices = await sql` select * from device where ownedBy =${currentUser[0].id}`;
@@ -53,7 +56,10 @@ const dashboard = {
       title: "Template 1 Dashboard",
       devicesempty: anyDevices(devices),
       devices: deviceArray,
-      employees: employeeArray
+      employees: employeeArray,
+      layout: 'dashboardlayout',
+      pushalertIntegrationJS: process.env.pushalertIntegrationJS,
+      notificationChannel: currentUser[0].pushalertid
     };
     console.log(viewData)
     response.render("dashboard", viewData);
