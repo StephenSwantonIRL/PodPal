@@ -78,7 +78,55 @@ const accounts = {
     const currentUser = await sql` select * from admin where email ='${userEmail}' `
     console.log("Count:" + currentUser['count'])
     return currentUser[0];
+  },
+
+  async employeeRegistration(request, response) {
+    //get the user and key from the route
+    const user = request.params.id;
+    const keyAssigned = CryptoJS.MD5(user).toString()
+    const keyPresented = request.params.key;
+    // if user exists && presents correct key render the form
+    const currentUser = await sql` select * from employee where id =${user} `.catch()
+    if (currentUser['count'] == 1 && keyAssigned === keyPresented && currentUser[0].password ==null) {
+      //render the form
+      const viewData = {
+        title: "Login to the Service",
+        userId: user,
+        key: keyPresented,
+        email: currentUser[0].email
+      };
+      console.log(viewData)
+      response.render("employeeSignup", viewData);
+    } else {
+      response.render("invite404");
+    }
+  },
+
+  async employeeSave(request, response) {
+    //get the user and key from the route
+    const user = request.params.id;
+    const newData = request.body
+    const keyAssigned = CryptoJS.MD5(user).toString()
+    const keyPresented = request.params.key;
+    // if user exists && presents correct key render the form
+    const currentUser = await sql` select * from employee where id =${user} `.catch()
+    if (currentUser['count'] == 1 && keyAssigned === keyPresented) {
+      const hashedPassword = CryptoJS.MD5(newData.password).toString()
+      const updatedUser = await sql` update employee set fName=${newData.firstname}, lName=${newData.lastname}, password=${hashedPassword} where id =${user}`
+      console.log(` update employee set fName=${newData.firstname}, lName=${newData.lastname}, password=${hashedPassword} where id =${user}`)
+      const viewData = {
+        title: "Login to the Service",
+        userId: user,
+        key: keyPresented,
+        email: currentUser[0].email
+      };
+      console.log(viewData)
+      response.render("employeeSignup", viewData);
+    } else {
+      response.render("invite404");
+    }
   }
+
   }
 
 

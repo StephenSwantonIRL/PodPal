@@ -17,9 +17,12 @@ router.post("/authenticate", accounts.authenticate);
 
 router.get("/", dashboard.index);
 router.get("/dashboard", dashboard.index);
+router.get("/home", dashboard.userDashBoard);
 router.get("/about", about.index);
 
 router.post("/dashboard/addDevice", dashboard.addDevice)
 router.post("/dashboard/addemployee", dashboard.addEmployee)
+router.get("/invite/:id/:key", accounts.employeeRegistration)
+router.post("/register/:id/:key", accounts.employeeSave)
 
 module.exports = router;

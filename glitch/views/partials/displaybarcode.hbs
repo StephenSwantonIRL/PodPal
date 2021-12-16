@@ -1,0 +1,12 @@
+<div>
+  <h3>Your Access Barcode</h3>
+      <svg class="barcode"
+           jsbarcode-width="1"
+           jsbarcode-height="50"
+           jsbarcode-value="{{barcodeid}}"
+           jsbarcode-textmargin="0"
+           jsbarcode-fontoptions="bold">
+      </svg><br>
+      {{barcodeid}}
+</div>
+<script>JsBarcode(".barcode").init();</script>

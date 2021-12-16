@@ -18,7 +18,20 @@ async function sendInvite(email) {
     to: email,
     subject: "Hello You've been invited to join a Podpal Workspace", // Subject line
     text: "Hello world?", // plain text body
-    html: "<b>Hello world?</b>", // html body
+    html: "<h2 style=\"text-align: center;\">Hello there!👋</h2>\n" +
+      "<p style=\"text-align: center;\">You've been invited to join a PodPal workspace.&nbsp;</p>\n" +
+      "<p style=\"text-align: center;\">Click below to complete your account and gain access.</p>\n" +
+      "<div>\n" +
+      "<table style=\"margin-left: auto; margin-right: auto;\" width=\"30%\">\n" +
+      "<tbody>\n" +
+      "<tr>\n" +
+      "<td style=\"text-align: center; background-color: #ed7d31; color: white;\">\n" +
+      "<h3><strong>Join Now</strong></h3>\n" +
+      "</td>\n" +
+      "</tr>\n" +
+      "</tbody>\n" +
+      "</table>\n" +
+      "</div>", // html body
   });
 
   console.log("Message sent: %s", info.messageId);
@@ -29,40 +42,85 @@ const dashboard = {
     const email = request.cookies.podpal;
     if(email==null){
       response.redirect("/");
-    }
-    const userEmail = email.toString();
-    const currentUser = await sql` select * from admin where email =${userEmail}`;
-    const devices = await sql` select * from device where ownedBy =${currentUser[0].id}`;
-    const employees = await sql` select * from employee where accountadmin =${currentUser[0].id}`;
+    } else {
+      const userEmail = email.toString();
+      const currentUser = await sql` select * from admin where email =${userEmail}`;
+      if (currentUser['count'] == 1) {
+        const devices = await sql` select * from device where ownedBy =${currentUser[0].id}`;
+        const employees = await sql` select * from employee where accountadmin =${currentUser[0].id}`;
 
-    let deviceArray =[];
-    for (let i=0; i<devices['count'];i++){
-      deviceArray.push(devices[i])
-    }
-    let employeeArray =[];
-    for (let i=0; i<employees['count'];i++){
-      employeeArray.push(employees[i])
-    }
-    function anyDevices(devices) {
-      if (devices['count'] == 0) {
-        return 1;
+        let deviceArray = [];
+        for (let i = 0; i < devices['count']; i++) {
+          deviceArray.push(devices[i])
+        }
+        let employeeArray = [];
+        for (let i = 0; i < employees['count']; i++) {
+          employeeArray.push(employees[i])
+        }
+
+        function anyDevices(devices) {
+          if (devices['count'] == 0) {
+            return 1;
+          } else {
+            return 0;
+          }
+        }
+
+        logger.info("dashboard rendering");
+        const viewData = {
+          title: "Template 1 Dashboard",
+          devicesempty: anyDevices(devices),
+          devices: deviceArray,
+          employees: employeeArray,
+          layout: 'dashboardlayout',
+          pushalertIntegrationJS: process.env.pushalertIntegrationJS,
+          notificationChannel: currentUser[0].pushalertid
+        };
+        console.log(viewData)
+        response.render("dashboard", viewData);
       } else {
-        return 0;
+        response.redirect("/");
       }
     }
+  },
 
-    logger.info("dashboard rendering");
-    const viewData = {
-      title: "Template 1 Dashboard",
-      devicesempty: anyDevices(devices),
-      devices: deviceArray,
-      employees: employeeArray,
-      layout: 'dashboardlayout',
-      pushalertIntegrationJS: process.env.pushalertIntegrationJS,
-      notificationChannel: currentUser[0].pushalertid
-    };
-    console.log(viewData)
-    response.render("dashboard", viewData);
+  async userDashBoard(request, response) {
+    const email = request.cookies.podpal;
+    if(email==null){
+      response.redirect("/");
+    } else {
+      const userEmail = email.toString();
+      const currentUser = await sql` select * from employee where email =${userEmail}`;
+      if (currentUser['count']) {
+        const devices = await sql` select * from device where ownedBy =${currentUser[0].accountadmin}`;
+
+        let deviceArray = [];
+        for (let i = 0; i < devices['count']; i++) {
+          deviceArray.push(devices[i])
+        }
+
+        function anyDevices(devices) {
+          if (devices['count'] == 0) {
+            return 1;
+          } else {
+            return 0;
+          }
+        }
+
+        logger.info(" User dashboard rendering");
+        const viewData = {
+          title: "Template 1 Dashboard",
+          devicesempty: anyDevices(devices),
+          devices: deviceArray,
+          currentUser: currentUser[0].id,
+          barcodeid: currentUser[0].barcodeid
+        };
+        console.log(viewData)
+        response.render("userdashboard", viewData);
+      } else {
+        response.redirect("/");
+      }
+    }
   },
 
   addDevice: async function(request, response) {

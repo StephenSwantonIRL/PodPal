@@ -1,0 +1,23 @@
+{{> menu id="dashboard"}}
+
+{{>displaybarcode}}
+  <section class="ui segment">
+    {{# if devicesempty}}
+    <h3> Your workspace doesn't have any devices yet. Check in with your administrator</h3>
+    {{/if}}
+    {{#each devices}}
+    <section class="ui segment">
+      <h2 class="ui header">
+        {{macaddress}}
+      </h2>
+
+      <div id="deviceactions">
+        <a href="/device/{{id}}" class="ui icon button">
+          <i class="icon folder open"></i>
+        </a>
+        </a>
+      </div>
+    </section>
+    {{/each}}
+  </section>
+
