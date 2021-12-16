@@ -6,6 +6,7 @@ const router = express.Router();
 const dashboard = require("./controllers/dashboard.js");
 const about = require("./controllers/about.js");
 const accounts = require("./controllers/accounts.js")
+const device = require("./controllers/device.js")
 
 
 router.get("/", accounts.index);
@@ -24,5 +25,7 @@ router.post("/dashboard/addDevice", dashboard.addDevice)
 router.post("/dashboard/addemployee", dashboard.addEmployee)
 router.get("/invite/:id/:key", accounts.employeeRegistration)
 router.post("/register/:id/:key", accounts.employeeSave)
+
+router.get("/device/:id", device.index);
 
 module.exports = router;
