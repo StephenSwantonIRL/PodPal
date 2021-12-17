@@ -2,6 +2,7 @@
 
 const express = require("express");
 const logger = require("./utils/logger");
+const helpers = require("./utils/helpers.js")
 const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const fileUpload = require("express-fileupload");
@@ -17,7 +18,10 @@ app.engine(
   ".hbs",
   exphbs({
     extname: ".hbs",
-    defaultLayout: "main"
+    defaultLayout: "main",
+    helpers: {
+      bookButton: (state,time, device, user) => helpers.bookButton(state,time, device, user)
+    }
   })
 );
 app.set("view engine", ".hbs");

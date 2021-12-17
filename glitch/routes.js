@@ -27,5 +27,6 @@ router.get("/invite/:id/:key", accounts.employeeRegistration)
 router.post("/register/:id/:key", accounts.employeeSave)
 
 router.get("/device/:id", device.index);
+router.get("/addBooking/:user/:device/:time", device.addBooking);
 
 module.exports = router;

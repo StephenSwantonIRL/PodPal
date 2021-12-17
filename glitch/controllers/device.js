@@ -26,7 +26,8 @@ const device = {
         const deviceBookings = await sql`select *, to_char(starttime, 'HH') as hour from booking  where (to_char(starttime, 'YYYY-MM-DD HH') like ${today}) and deviceused =${deviceId}`
         let alreadyBooked = []
         for(let i=0; i<deviceBookings['count'];i++){
-          alreadyBooked.push(deviceBookings[i].hour)
+          alreadyBooked.push(deviceBookings[i].starttime.toISOString().substring(11,13))
+          console.log(alreadyBooked)
         }
 
         const viewData = {
@@ -57,10 +58,15 @@ const device = {
       response.redirect("/dashboard")
     },
 
-  addBooking(request, response){
-    //const deviceId = request.params.id
+  async addBooking(request, response){
+    const deviceId = request.params.device
+    const startHour = request.params.time
+    const startTimeDate = new Date().toISOString().substring(0,10)+ " "+ startHour +":00:00 +0000"
+    console.log(startTimeDate)
+    const userId = request.params.user
     // sql to add new booking
-
+    //console.log(`insert into booking ( starttime, duration, bookedby, deviceused) values (${startTimeDate}, '60', ${userId}, ${deviceId})`)
+    const addSQL = await sql`insert into booking ( starttime, duration, bookedby, deviceused) values (${startTimeDate}, '60', ${userId}, ${deviceId})`
     response.redirect("/device/"+deviceId)
   },
 
