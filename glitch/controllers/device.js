@@ -25,9 +25,14 @@ const device = {
         const deviceDetails = await sql`select * from device where macaddress = ${deviceId}`
         const deviceBookings = await sql`select *, to_char(starttime, 'HH') as hour from booking  where (to_char(starttime, 'YYYY-MM-DD HH') like ${today}) and deviceused =${deviceId}`
         let alreadyBooked = []
+        let ownBooking =[]
         for(let i=0; i<deviceBookings['count'];i++){
           alreadyBooked.push(deviceBookings[i].starttime.toISOString().substring(11,13))
-          console.log(alreadyBooked)
+
+          if(deviceBookings[i].bookedby == currentUser[0].id){
+            ownBooking.push(deviceBookings[i].starttime.toISOString().substring(11,13))
+            console.log(ownBooking)
+          }
         }
 
         const viewData = {
@@ -43,6 +48,7 @@ const device = {
           h15: alreadyBooked.includes('15'),
           h16: alreadyBooked.includes('16'),
           h17: alreadyBooked.includes('17'),
+          ownBookings : ownBooking
         }
         response.render('device', viewData);
         logger.info(viewData);

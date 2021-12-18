@@ -20,7 +20,7 @@ app.engine(
     extname: ".hbs",
     defaultLayout: "main",
     helpers: {
-      bookButton: (state,time, device, user) => helpers.bookButton(state,time, device, user)
+      bookButton: (state,time, device, user, ownBookings) => helpers.bookButton(state,time, device, user, ownBookings)
     }
   })
 );
