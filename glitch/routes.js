@@ -28,5 +28,6 @@ router.post("/register/:id/:key", accounts.employeeSave)
 
 router.get("/device/:id", device.index);
 router.get("/addBooking/:user/:device/:time", device.addBooking);
+router.get("/cancelBooking/:user/:device/:time", device.cancelBooking);
 
 module.exports = router;

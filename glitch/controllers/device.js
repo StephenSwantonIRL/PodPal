@@ -76,6 +76,19 @@ const device = {
     response.redirect("/device/"+deviceId)
   },
 
+  async cancelBooking(request, response){
+    const deviceId = request.params.device
+    let startHour = request.params.time
+    if(startHour>12){
+      startHour -=12;
+      startHour = '0'+startHour.toString()
+    }
+    const bookingDateTime = new Date().toISOString().substring(0,10)+" "+ startHour+'%'
+    const userId = request.params.user
+    const deleteSQL = await sql`delete from booking where (to_char(starttime, 'YYYY-MM-DD HH') like ${bookingDateTime}) AND (deviceused=${deviceId}) AND bookedby=${userId}`
+    response.redirect("/device/"+deviceId)
+  },
+
 };
 
 module.exports = device;
