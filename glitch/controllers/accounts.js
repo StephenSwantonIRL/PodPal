@@ -57,10 +57,16 @@ const accounts = {
     const userToAuthenticate = request.body;
     const userpw = CryptoJS.MD5(userToAuthenticate.password).toString()
 
-    const checkIfRegistered = await sql` select * from admin where email =${userToAuthenticate.email} AND password=${userpw}`
-    if(checkIfRegistered['count']==1){
+    //const checkIfRegistered = await sql` select * from admin where email =${userToAuthenticate.email} AND password=${userpw}`
+    const checkIfRegistered = await sql`with C as ( select email, password, 'admin' as role from admin where email = ${userToAuthenticate.email} AND password=${userpw}  )  SELECT * FROM C 
+UNION ALL select email, password, 'employee' as role from employee where email = ${userToAuthenticate.email} AND password=${userpw} AND NOT EXISTS (SELECT * FROM C);`
+
+    if(checkIfRegistered['count']==1 && checkIfRegistered[0].role=='admin'){
       response.cookie("podpal", userToAuthenticate.email);
       response.redirect("/dashboard");
+    } else if(checkIfRegistered['count']==1 && checkIfRegistered[0].role=='employee'){
+      response.cookie("podpal", userToAuthenticate.email);
+      response.redirect("/home");
     }
     else  {
       const viewData = {
