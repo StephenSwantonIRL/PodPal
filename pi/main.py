@@ -1,6 +1,7 @@
 import serial
 import time
 import datetime
+from datetime import timedelta
 from pyzbar import pyzbar
 from sense_hat import SenseHat
 from imutils.video import VideoStream
@@ -14,6 +15,7 @@ import requests
 
 sense = SenseHat()
 squatter = False
+squatterOldValue = False
 config = dotenv_values(".env")
 
 conn = psycopg2.connect(
@@ -39,11 +41,18 @@ timenow = datetime.datetime.now()
 timestring = str(timenow.isoformat())
 timesearchstring = timestring[0:10] + " " + timestring[11:13] + "%"
 cur.execute(
-                f"select starttime, barcodeid from employee left join booking on employee.id = booking.bookedby left join device on booking.deviceused = device.macaddress where (to_char(booking.starttime, 'YYYY-MM-DD HH') like '{timesearchstring}') AND device.macaddress='{macaddress}'")
+                f"select starttime, barcodeid, duration from employee left join booking on employee.id = booking.bookedby left join device on booking.deviceused = device.macaddress where (to_char(booking.starttime, 'YYYY-MM-DD HH') like '{timesearchstring}') AND device.macaddress='{macaddress}'")
 bookings = []
+bookingStart = []
+bookingDuration = []
 for row in cur:
-    bookings.append(row[0])
-
+    bookings.append(bytes(row[1], 'utf-8'))
+    bookingStart.append(row[0])
+    bookingDuration.append(row[2])
+if len(bookings) > 0:
+    isBooked = 1
+else:
+    isBooked = 0
 cur.close()
 
 isSignedIn = 0
@@ -56,7 +65,7 @@ def decode(image):
         barcode_data.append(obj.data)
     return barcode_data
 
-def send_mail(eFrom, to, subject, text, html):
+def send_mail(eFrom, to, subject, text, html, device):
     # SMTP Server details: update to your credentials or use class server
     smtpServer = config['smtpServer']
     smtpUser= config['smtpUser']
@@ -64,7 +73,7 @@ def send_mail(eFrom, to, subject, text, html):
     port=587
     #construct MIME Multipart email message
     msg = MIMEMultipart()
-    msg.attach(MIMEText(text))
+    #msg.attach(MIMEText(text))
     msg.attach(MIMEText(html, 'html'))
     msg['Subject'] = subject
 
@@ -84,12 +93,12 @@ def send_pushalert():
 
     data = {
         'title': 'Squatter Alert',
-        'message': 'Warning Squatter detected',
+        'message': f'Warning Squatter detected - {macaddress}',
         'url': 'http://podpal.work'
     }
 
     #response = requests.post('https://api.pushalert.co/rest/v1/send', headers=headers, data=data)
-    response=requests.post(f'https://api.pushalert.co/rest/v1/segment/{pushAlertSegment}/send', headers=headers, data=data)
+    response = requests.post(f'https://api.pushalert.co/rest/v1/segment/{pushAlertSegment}/send', headers=headers, data=data)
 
 
 if __name__ == '__main__':
@@ -112,37 +121,52 @@ if __name__ == '__main__':
             cur = conn.cursor()
             macaddress = config['macaddress']
             cur.execute(
-                f"select starttime, barcodeid from employee left join booking on employee.id = booking.bookedby where (to_char(booking.starttime, 'YYYY-MM-DD HH') like '{timesearchstring}') AND device.macaddress='{macaddress}'")
+                f"select starttime, barcodeid, duration from employee left join booking on employee.id = booking.bookedby where (to_char(booking.starttime, 'YYYY-MM-DD HH') like '{timesearchstring}') AND device.macaddress='{macaddress}'")
             bookings = []
+            bookingStart = []
+            bookingDuration = []
             for row in cur:
-                bookings.append(row[0])
+                bookings.append(bytes(row[1],'utf-8'))
+                bookingStart.append(row[0])
+                bookingDuration.append(row[2])
+            if len(bookings) >0:
+                isBooked = 1
+            else:
+                isBooked = 0
+        #print(bookings)
+
         if timenow.minute == 1 and bookingqueryflag == 1:
             bookingqueryflag = 0
 
         frame = vs.read()
         barcodes = decode(frame)
+        print(barcodes)
         for i in barcodes:
             if i in bookings:
                 sense.clear((0,128,0))
                 time.sleep(3)
                 sense.clear()
                 isSignedIn = 1
+                timeRemaining = (bookingStart[0] + timedelta(minutes=bookingDuration[0])) - datetime.datetime.now()
+                timeRemainingString = str(timeRemaining)[2:4]
                 # build serial message   [0] isBooked [1] isSignedIn [2] duration
-                ser.write(b"1#1#35#\n")
+                serialMessage = bytes(f'#{isBooked}#{isSignedIn}#{timeRemainingString}#', 'utf-8')
+                print(serialMessage)
+                ser.write(serialMessage)
             else:
                 sense.clear((255,0,0))
                 time.sleep(3)
                 sense.clear()
         line = ser.readline().decode('utf-8').rstrip()
-        # to do: valuate line as a number - > trigger email and push alert but only once every 15 minutes
-        squatterOldValue = squatter
-        squatter = True
+        if(line != ''):
+            squatterOldValue = squatter
+            squatter = True
         if squatterOldValue is False and squatter is True and countdown == 0:
             # countdown to trigger notifications every 15 mins approx
             countdown = 750
         if squatter and countdown == 750:
             send_pushalert()
-            send_mail('alerts@podpal.work', adminEmail, 'Squatter Detected', 'text version', 'html version')
+            send_mail('alerts@podpal.work', adminEmail, 'Squatter Detected', 'text version', 'html version', macaddress)
         if countdown > 1:
             countdown -= 1
             print(countdown)
