@@ -1,14 +1,12 @@
 "use strict";
 
 const logger = require("../utils/logger");
-const accounts = require("./accounts.js");
-const postgres = require('postgres')
-const axios = require('axios');
 const uuid = require("uuid");
 const sql = require('../db.js')
 const nodemailer = require("nodemailer");
 const CryptoJS = require("crypto-js")
 
+// function that prepare the notification inviting users to join a workspace
 async function sendInvite(email, id, key) {
 
   console.log(`smtps://${process.env.systememail}:${process.env.systememailpw}@${process.env.systememailhost}/?pool=true`)
@@ -39,10 +37,12 @@ async function sendInvite(email, id, key) {
 
 const dashboard = {
   async index(request, response) {
+    // any one going to the dashboard should already be logged in
     const email = request.cookies.podpal;
     if(email==null){
       response.redirect("/");
     } else {
+      // retrieve the users information
       const userEmail = email.toString();
       const currentUser = await sql` select * from admin where email =${userEmail}`;
       if (currentUser['count'] == 1) {
@@ -66,13 +66,14 @@ const dashboard = {
           }
         }
 
-        logger.info("dashboard rendering");
+        // build the object to pass to express hbs
         const viewData = {
-          title: "Template 1 Dashboard",
+          title: "Dashboard",
           devicesempty: anyDevices(devices),
           currentUser: currentUser[0].id,
           devices: deviceArray,
           employees: employeeArray,
+          // admins have a distinct layout that has  javascript for push alert integration all other view use the main layout
           layout: 'dashboardlayout',
           pushalertIntegrationJS: process.env.pushalertIntegrationJS,
           notificationChannel: currentUser[0].pushalertid
@@ -84,12 +85,14 @@ const dashboard = {
       }
     }
   },
-
+// end users see a different dashboard to admin users
   async userDashBoard(request, response) {
+    // again only logged in users should be able to access
     const email = request.cookies.podpal;
     if(email==null){
       response.redirect("/");
     } else {
+      // retrieve the user's info from the db
       const userEmail = email.toString();
       const currentUser = await sql` select * from employee where email =${userEmail}`;
       if (currentUser['count']) {
@@ -109,6 +112,7 @@ const dashboard = {
         }
 
         logger.info(" User dashboard rendering");
+        // build the object to pass to express hbs
         const viewData = {
           title: "Template 1 Dashboard",
           devicesempty: anyDevices(devices),
@@ -123,7 +127,7 @@ const dashboard = {
       }
     }
   },
-
+// function to allow admin users to add new devices to their account
   addDevice: async function(request, response) {
     const email = request.cookies.podpal;
     const userEmail = email.toString();
@@ -133,6 +137,8 @@ const dashboard = {
     ;
     response.redirect("/dashboard");
   },
+  //function to add new end users to an administrators account
+
   addEmployee: async function(request, response) {
     const email = request.cookies.podpal;
     const userEmail = email.toString();
@@ -140,14 +146,16 @@ const dashboard = {
 
     const invitedEmails = request.body.emailstoinvite;
     const invitedEmailsArray = invitedEmails.split("\n")
-
+    // loops over the list of emails provided by the admin user and generates a barcode id for the user before inserting to db
     for(let i=0; i<invitedEmailsArray.length; i++){
       let barcode = uuid.v1().replace(/-/g, "").substring(0,10);
       let invitation = await sql` INSERT INTO employee (email, accountAdmin, barcodeId) VALUES ( ${invitedEmailsArray[i]}, ${currentUser[0].id}, ${barcode})`
+      // retrieves the id of the new user and then creates an invite key
       let createdId = await sql` select * from employee where email = ${invitedEmailsArray[i]}`
       let createdKey = CryptoJS.MD5(createdId[0].id).toString()
       console.log(createdId[0].id)
       console.log(createdKey)
+      // sends an invitation email with unique invite link
       await sendInvite(invitedEmailsArray[i], createdId[0].id, createdKey).catch();
     }
 

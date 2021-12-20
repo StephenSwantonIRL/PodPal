@@ -57,12 +57,6 @@ const device = {
       }
     }
   },
-    deleteDevice(request, response)
-    {
-      const deviceId = request.params.id
-      //to do - delete statement
-      response.redirect("/dashboard")
-    },
 
   async addBooking(request, response){
     const deviceId = request.params.device
