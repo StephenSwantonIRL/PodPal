@@ -1,5 +1,6 @@
-<div>
+<div class="ui segment">
   <h3>Your Access Barcode</h3>
+  <p> Use this barcode to sign in to devices:</p>
       <svg class="barcode"
            jsbarcode-width="1"
            jsbarcode-height="50"
@@ -7,6 +8,5 @@
            jsbarcode-textmargin="0"
            jsbarcode-fontoptions="bold">
       </svg><br>
-      {{barcodeid}}
 </div>
 <script>JsBarcode(".barcode").init();</script>

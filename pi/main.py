@@ -65,7 +65,7 @@ def decode(image):
         barcode_data.append(obj.data)
     return barcode_data
 
-def send_mail(eFrom, to, subject, text, html, device):
+def send_mail(eFrom, to, subject ):
     # SMTP Server details: update to your credentials or use class server
     smtpServer = config['smtpServer']
     smtpUser= config['smtpUser']
@@ -74,6 +74,7 @@ def send_mail(eFrom, to, subject, text, html, device):
     #construct MIME Multipart email message
     msg = MIMEMultipart()
     #msg.attach(MIMEText(text))
+    html = f'<p><img style="display: block; margin-left: auto; margin-right: auto;" src="https://ss-ll.s3.eu-west-1.amazonaws.com/podpal.png" alt="" width="382" height="232" /></p><p>Dear Administrator,&nbsp;</p><p>We have detected an unregistered user in the following PodPal device:</p><p>{macaddress}</p><p>Move quickly and you will catch them in the act!&nbsp;</p><p>Kind regards&nbsp;</p><p>The PodPal Team</p>'
     msg.attach(MIMEText(html, 'html'))
     msg['Subject'] = subject
 
@@ -166,7 +167,7 @@ if __name__ == '__main__':
             countdown = 750
         if squatter and countdown == 750:
             send_pushalert()
-            send_mail('alerts@podpal.work', adminEmail, 'Squatter Detected', 'text version', 'html version', macaddress)
+            send_mail('alerts@podpal.work', adminEmail, 'Squatter Detected')
         if countdown > 1:
             countdown -= 1
             print(countdown)

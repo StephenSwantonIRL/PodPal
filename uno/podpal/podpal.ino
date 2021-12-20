@@ -7,6 +7,7 @@
 SR04 sr04 = SR04(ECHO_PIN, TRIG_PIN);
 LiquidCrystal lcd(4, 5, 6, 7, 8, 9);
 long nearestObject;
+long oldNearestObject;
 unsigned long delaytime1 = 500;
 unsigned long delaytime2 = 50;
 unsigned long bookingEndTime;
@@ -22,7 +23,7 @@ void setup() {
   Serial.begin(9600);
   lcd.begin(16, 2);
   lcd.print("Minutes Remaining:");
-
+  nearestObject = sr04.Distance();
 }
 void loop() {
   if (Serial.available() > 0) {
@@ -53,12 +54,20 @@ void loop() {
     
     }
   }
+  oldNearestObject = nearestObject;
   nearestObject = sr04.Distance();
+  if(oldNearestObject >70 && nearestObject <70){
   Serial.print(nearestObject);
+  Serial.print('\n');
+  }
   lcd.setCursor(0, 1);
   if(bookingEndTime>0){
   timeRemaining = (bookingEndTime - millis());
-  lcd.print(timeRemaining/60000);
+  if(timeRemaining>60000){
+    lcd.print(timeRemaining/60000);
+  } else {
+    lcd.print("Time Up");
+  }
   }
   
 }

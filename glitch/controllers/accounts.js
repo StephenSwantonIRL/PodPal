@@ -108,6 +108,17 @@ UNION ALL select email, password, 'employee' as role from employee where email =
     }
   },
 
+
+  async revokeEmployee(request, response) {
+    //get the user and key from the route
+    const user = request.params.id;
+    const admin = request.params.adminid;
+    // if user exists && presents correct key render the form
+    const currentUser = await sql` delete from employee where id =${user} and accountadmin=${admin}`.catch()
+    response.redirect("/dashboard");
+
+  },
+
   async employeeSave(request, response) {
     //get the user and key from the route
     const user = request.params.id;

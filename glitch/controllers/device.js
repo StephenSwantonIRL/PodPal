@@ -89,6 +89,17 @@ const device = {
     response.redirect("/device/"+deviceId)
   },
 
+  async deleteDevice(request, response) {
+    //get the user and key from the route
+    const device = request.params.deviceId;
+    const admin = request.params.id;
+
+    const deleteDevice = await sql` delete from device where ownedBy =${admin} and macaddress=${device}`.catch()
+    response.redirect("/dashboard");
+
+  },
+
+
 };
 
 module.exports = device;

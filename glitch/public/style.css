@@ -1,0 +1,29 @@
+BODY
+{
+	background-image: url(images/fr-product-hero-2021-lg-up.png);
+	background-color: #DFB05C;
+	background-position: -2000px -350px;
+	background-repeat: no-repeat;
+	background-attachment: fixed;
+}
+HEADER.header IMG
+{
+	width: 150px;
+}
+DIV.introduction H1
+{
+	color: #E8A124 !important;
+}
+A.ui.huge.inverted.button
+{
+	background: #DFB05C;
+}
+.green
+{
+	background: #4EA5B7 !important;
+}
+.red
+{
+	background: #F29759 !important;
+	width: ;
+}

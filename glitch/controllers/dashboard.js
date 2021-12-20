@@ -7,9 +7,9 @@ const axios = require('axios');
 const uuid = require("uuid");
 const sql = require('../db.js')
 const nodemailer = require("nodemailer");
+const CryptoJS = require("crypto-js")
 
-
-async function sendInvite(email) {
+async function sendInvite(email, id, key) {
 
   console.log(`smtps://${process.env.systememail}:${process.env.systememailpw}@${process.env.systememailhost}/?pool=true`)
   let transporter = nodemailer.createTransport(`smtps://${process.env.systememail}:${process.env.systememailpw}@${process.env.systememailhost}/?pool=true`)
@@ -26,7 +26,7 @@ async function sendInvite(email) {
       "<tbody>\n" +
       "<tr>\n" +
       "<td style=\"text-align: center; background-color: #ed7d31; color: white;\">\n" +
-      "<h3><strong>Join Now</strong></h3>\n" +
+      `<a href="https://podpal.work/invite/${id}/${key}"><h3><strong>Join Now</strong></h3></a>\n` +
       "</td>\n" +
       "</tr>\n" +
       "</tbody>\n" +
@@ -70,6 +70,7 @@ const dashboard = {
         const viewData = {
           title: "Template 1 Dashboard",
           devicesempty: anyDevices(devices),
+          currentUser: currentUser[0].id,
           devices: deviceArray,
           employees: employeeArray,
           layout: 'dashboardlayout',
@@ -141,9 +142,13 @@ const dashboard = {
     const invitedEmailsArray = invitedEmails.split("\n")
 
     for(let i=0; i<invitedEmailsArray.length; i++){
-      let barcode = uuid.v1().replace(/-/g, "");
+      let barcode = uuid.v1().replace(/-/g, "").substring(0,10);
       let invitation = await sql` INSERT INTO employee (email, accountAdmin, barcodeId) VALUES ( ${invitedEmailsArray[i]}, ${currentUser[0].id}, ${barcode})`
-      await sendInvite(invitedEmailsArray[i]).catch();
+      let createdId = await sql` select * from employee where email = ${invitedEmailsArray[i]}`
+      let createdKey = CryptoJS.MD5(createdId[0].id).toString()
+      console.log(createdId[0].id)
+      console.log(createdKey)
+      await sendInvite(invitedEmailsArray[i], createdId[0].id, createdKey).catch();
     }
 
     response.redirect("/dashboard");

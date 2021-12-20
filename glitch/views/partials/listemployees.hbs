@@ -20,10 +20,9 @@
            jsbarcode-textmargin="0"
            jsbarcode-fontoptions="bold">
       </svg><br>
-      {{barcodeid}}
     </td>
     <td>
-      <a href="/station/{{../sid}}/deletereading/{{id}}" class="ui tiny button">Revoke</a>
+      <a href="/revoke/{{../currentUser}}/{{id}}" class="ui tiny button">Revoke</a>
     </td>
   </tr>
   {{/each}}

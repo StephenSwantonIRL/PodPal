@@ -19,15 +19,19 @@ router.post("/authenticate", accounts.authenticate);
 router.get("/", dashboard.index);
 router.get("/dashboard", dashboard.index);
 router.get("/home", dashboard.userDashBoard);
+router.get("/logout", accounts.logout);
 router.get("/about", about.index);
 
 router.post("/dashboard/addDevice", dashboard.addDevice)
 router.post("/dashboard/addemployee", dashboard.addEmployee)
 router.get("/invite/:id/:key", accounts.employeeRegistration)
+router.get("/revoke/:adminid/:id", accounts.revokeEmployee)
+
 router.post("/register/:id/:key", accounts.employeeSave)
 
 router.get("/device/:id", device.index);
 router.get("/addBooking/:user/:device/:time", device.addBooking);
 router.get("/cancelBooking/:user/:device/:time", device.cancelBooking);
+router.get("/deletedevice/:id/:deviceId", device.deleteDevice)
 
 module.exports = router;
