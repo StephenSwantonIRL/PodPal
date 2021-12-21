@@ -138,10 +138,11 @@ if __name__ == '__main__':
             cur = conn.cursor()
             macaddress = config['macaddress']
             cur.execute(
-                f"select starttime, barcodeid, duration from employee left join booking on employee.id = booking.bookedby where (to_char(booking.starttime, 'YYYY-MM-DD HH') like '{timesearchstring}') AND device.macaddress='{macaddress}'")
+                f"select starttime, barcodeid, duration from employee left join booking on employee.id = booking.bookedby left join device on booking.deviceused = device.macaddress where (to_char(booking.starttime, 'YYYY-MM-DD HH') like '{timesearchstring}') AND device.macaddress='{macaddress}'")
             bookings = []
             bookingStart = []
             bookingDuration = []
+            isSignedIn = 0
             for row in cur:
                 bookings.append(bytes(row[1],'utf-8'))
                 bookingStart.append(row[0])
@@ -182,7 +183,7 @@ if __name__ == '__main__':
             squatterOldValue = squatter
             squatter = True
         # set a variable to act as a countdown so that the admin user doesn't get hundreds of notifications
-        if squatterOldValue is False and squatter is True and countdown == 0:
+        if squatterOldValue is False and squatter is True and countdown == 0 and isSignedIn == 0:
             # each loop cycle timed at approximately 1 second - 750 on count down variable gives approximately 15 minutes.
             countdown = 750
         if squatter and countdown == 750:
